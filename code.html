@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #game-container {
+            margin-top: 20px;
+        }
+        #game-over-message {
+            display: none;
+            color: red;
+            font-size: 30px;
+            font-weight: bold;
+        }
+    </style>
+    <script async src="//license.novelgames.com/games/game.js"></script>
+    <script>
+        // Check if the game has already been played in any session
+        document.addEventListener("DOMContentLoaded", function () {
+            if (sessionStorage.getItem("gamePlayed") === "true" || localStorage.getItem("gamePlayed") === "true") {
+                blockGameAccess();  // Block game access if already played
+            } else {
+                showGame();  // Show game for the first time
+            }
+        });
+
+        // Function to show the game
+        function showGame() {
+            document.getElementById("game-container").style.display = "block"; // Show the game iframe
+            document.getElementById("game-over-message").style.display = "none"; // Hide "Game Over" message
+        }
+
+        // Function to block the game once played
+        function blockGameAccess() {
+            document.getElementById("game-container").style.display = "none";  // Hide the game
+            document.getElementById("game-over-message").style.display = "block";  // Show "Game Over" message
+            localStorage.setItem("gamePlayed", "true");  // Block game permanently using localStorage
+            sessionStorage.setItem("gamePlayed", "true"); // Block game in the current session
+        }
+
+        // Function to detect "Game Over" text and block the game
+        function detectGameOver() {
+            const observer = new MutationObserver(() => {
+                if (document.body.innerText.includes("Game Over")) {
+                    blockGameAccess(); // Block game when "Game Over" is detected
+                    observer.disconnect(); // Stop observing once "Game Over" is found
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        window.onload = function () {
+            detectGameOver(); // Start detecting for "Game Over"
+        };
+
+        // Ensure the game stays blocked after page refresh
+        window.addEventListener("beforeunload", function () {
+            localStorage.setItem("gamePlayed", "true");  // Store flag in localStorage to block on future page loads
+            sessionStorage.setItem("gamePlayed", "true"); // Store flag in sessionStorage for the current session
+        });
+    </script>
+</head>
+<body>
+    <h2>Memory Game</h2>
+    <p>You can only play this game once. Refreshing or reopening will block access.</p>
+
+    <div id="game-container">
+        <ins class="novelgames_cloudgame" data-game-short-name="patternmemory2" data-language="en"></ins>
+    </div>
+
+    <div id="game-over-message">
+        <h3>Game Over</h3>
+        <p>You cannot play this game again.</p>
+    </div>
+</body>
+</html>
